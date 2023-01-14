@@ -1,5 +1,5 @@
-import './transaction.dart';
 import 'package:flutter/material.dart';
+import './widgets/transaction_list.dart';
 
 void main() => runApp(MyApp());
 
@@ -14,20 +14,10 @@ class MyApp extends StatelessWidget {
 }
 
 class MyHomePage extends StatelessWidget {
-  final List<Transaction> transactions = [
-    Transaction(
-      id: 't1',
-      title: 'New Shoes',
-      amount: 69.99,
-      date: DateTime.now(),
-    ),
-    Transaction(
-      id: 't2',
-      title: 'Weekly groceries',
-      amount: 16.53,
-      date: DateTime.now(),
-    ),
-  ];
+  // String titleInput;
+  // String amountInput;
+  final titleController = TextEditingController();
+  final amountController = TextEditingController();
 
   @override
   Widget build(BuildContext context) {
@@ -36,7 +26,7 @@ class MyHomePage extends StatelessWidget {
         title: Text('Flutter App'),
       ),
       body: Column(
-        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+        // mainAxisAlignment: MainAxisAlignment.spaceEvenly,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Container(
@@ -49,55 +39,46 @@ class MyHomePage extends StatelessWidget {
               elevation: 5,
             ),
           ),
-          Column(
-            children: transactions
-                .map(
-                  (tx) => Card(
-                    child: Row(
-                      children: [
-                        Container(
-                          decoration: BoxDecoration(
-                            border: Border.all(
-                              color: Colors.deepPurple,
-                              width: 2,
-                            ),
-                          ),
-                          padding: EdgeInsets.all(10),
-                          margin: EdgeInsets.symmetric(
-                              horizontal: 15, vertical: 10),
-                          child: Text(
-                            '\$${tx.amount}',
-                            style: TextStyle(
-                              fontSize: 20,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                        ),
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              tx.title,
-                              style: TextStyle(
-                                fontWeight: FontWeight.bold,
-                                fontSize: 20,
-                                color: Colors.green[600],
-                              ),
-                            ),
-                            Text(
-                              '${tx.date}',
-                              style: TextStyle(
-                                  color: Colors.blueGrey[300],
-                                  fontWeight: FontWeight.bold),
-                            ),
-                          ],
-                        ),
-                      ],
+          Card(
+            child: Container(
+              padding: EdgeInsets.all(12),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: [
+                  TextField(
+                    cursorColor: Colors.blue,
+                    decoration: InputDecoration(
+                      hintText: 'Title',
                     ),
+                    controller: titleController,
+                    // onChanged: (value) => titleInput = value,
                   ),
-                )
-                .toList(),
+                  TextField(
+                    cursorColor: Colors.blue,
+                    decoration: InputDecoration(
+                      hintText: 'Amount',
+                    ),
+                    controller: amountController,
+                    // onChanged: (value) => amountInput = value,
+                  ),
+                  FlatButton(
+                    onPressed: () {
+                      // print('Title: $titleInput');
+                      // print('Amount: $amountInput');
+
+                      print('Title: ${titleController.text}');
+                      print('Amount: ${amountController.text}');
+                      // titleInput = '';
+                      // amountInput = '';
+                    },
+                    child: Text('Add Transaction'),
+                    textColor: Colors.purpleAccent,
+                  )
+                ],
+              ),
+            ),
           ),
+          TransactionList(),
         ], // Top Column children
       ),
     );
