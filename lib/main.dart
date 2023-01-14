@@ -71,18 +71,22 @@ class _MyHomePageState extends State<MyHomePage> {
     }).toList();
   }
 
-  void _addNewTransaction(String txTitle, double txAmount) {
+  void _addNewTransaction(
+      String txTitle, double txAmount, DateTime chosenDate) {
     final newTx = Transaction(
       id: DateTime.now().toString(),
       title: txTitle,
       amount: txAmount,
-      date: DateTime.now(),
+      date: chosenDate,
     );
 
     setState(() {
       _userTransactions.add(newTx);
     });
   }
+
+  void _deleteTransaction(String id) => setState(
+      () => _userTransactions.removeWhere((element) => element.id == id));
 
   void startAddNewTransation(BuildContext ctx) {
     showModalBottomSheet(
@@ -122,7 +126,10 @@ class _MyHomePageState extends State<MyHomePage> {
           children: [
             Chart(_recentTransactions),
             // NewTransaction(_addNewTransaction),
-            TransactionList(userTransactions: _userTransactions),
+            TransactionList(
+              userTransactions: _userTransactions,
+              deleteTx: _deleteTransaction,
+            ),
           ], // Top Column children
         ),
       ),

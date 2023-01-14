@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 
 class NewTransaction extends StatefulWidget {
   final Function addTx;
@@ -10,22 +11,36 @@ class NewTransaction extends StatefulWidget {
 }
 
 class _NewTransactionState extends State<NewTransaction> {
-  final titleController = TextEditingController();
+  final _titleController = TextEditingController();
+  final _amountController = TextEditingController();
+  DateTime _selectedDate;
 
-  final amountController = TextEditingController();
+  void _submitData() {
+    if (_amountController.text.isEmpty) {
+      return;
+    }
+    final enteredTitle = _titleController.text;
+    final enteredAmount = double.parse(_amountController.text);
 
-  void submitData() {
-    final enteredTitle = titleController.text;
-    final enteredAmount = double.parse(amountController.text);
-
-    if (enteredTitle.isEmpty || enteredAmount < 0) {
+    if (enteredTitle.isEmpty || enteredAmount <= 0 || _selectedDate == null) {
       return;
     }
 
-    widget.addTx(enteredTitle, enteredAmount);
-    titleController.clear();
-    amountController.clear();
+    widget.addTx(enteredTitle, enteredAmount, _selectedDate);
+    _titleController.clear();
+    _amountController.clear();
     Navigator.pop(context);
+  }
+
+  void _presentDatePicker() {
+    showDatePicker(
+            context: context,
+            initialDate: DateTime.now(),
+            firstDate: DateTime(2023),
+            lastDate: DateTime.now())
+        .then((pickedDate) => pickedDate == null
+            ? null
+            : setState(() => _selectedDate = pickedDate));
   }
 
   @override
@@ -41,9 +56,9 @@ class _NewTransactionState extends State<NewTransaction> {
               decoration: InputDecoration(
                 hintText: 'Title',
               ),
-              controller: titleController,
+              controller: _titleController,
               onSubmitted: (_) {
-                submitData();
+                _submitData();
               },
 
               // onChanged: (value) => titleInput = value,
@@ -53,25 +68,44 @@ class _NewTransactionState extends State<NewTransaction> {
               decoration: InputDecoration(
                 hintText: 'Amount',
               ),
-              controller: amountController,
+              controller: _amountController,
               keyboardType: TextInputType.number,
               onSubmitted: (_) {
-                submitData();
+                _submitData();
               },
               // onChanged: (value) => amountInput = value,
             ),
+            Container(
+              height: 70,
+              child: Row(
+                children: [
+                  Expanded(
+                    child: Text(
+                      _selectedDate == null
+                          ? 'No Date Chosen!'
+                          : 'Picked Date: ${DateFormat.yMd().format(_selectedDate)}',
+                    ),
+                  ),
+                  FlatButton(
+                    onPressed: _presentDatePicker,
+                    child: Text(
+                      'Choose Date',
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    textColor: Theme.of(context).primaryColor,
+                  ),
+                ],
+              ),
+            ),
             FlatButton(
               onPressed: () {
-                // print('Title: $titleInput');
-                // print('Amount: $amountInput');
-                submitData();
-                print('Title: ${titleController.text}');
-                print('Amount: ${amountController.text}');
-                // titleInput = '';
-                // amountInput = '';
+                _submitData();
               },
               child: Text('Add Transaction'),
-              textColor: Colors.purpleAccent,
+              textColor: Colors.white,
+              color: Colors.purple[300],
             )
           ],
         ),
