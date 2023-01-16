@@ -1,6 +1,6 @@
 import 'dart:io';
 
-import 'package:flutter/services.dart';
+// import 'package:flutter/services.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 
@@ -59,7 +59,7 @@ class MyHomePage extends StatefulWidget {
   _MyHomePageState createState() => _MyHomePageState();
 }
 
-class _MyHomePageState extends State<MyHomePage> {
+class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
   final List<Transaction> _userTransactions = [
     Transaction(
       id: 't1',
@@ -74,44 +74,61 @@ class _MyHomePageState extends State<MyHomePage> {
       date: DateTime.now(),
     ),
     Transaction(
-      id: 't2',
+      id: 't3',
       title: 'Accessories',
-      amount: 16.53,
+      amount: 26.53,
       date: DateTime.now().subtract(Duration(days: 1)),
     ),
     Transaction(
-      id: 't2',
+      id: 't4',
       title: 'Clothes',
-      amount: 16.53,
+      amount: 10.53,
       date: DateTime.now().subtract(Duration(days: 2)),
     ),
     Transaction(
-      id: 't2',
+      id: 't5',
       title: 'Peripherals',
-      amount: 16.53,
+      amount: 36.53,
       date: DateTime.now().subtract(Duration(days: 3)),
     ),
     Transaction(
-      id: 't2',
+      id: 't6',
       title: 'Toiletries',
-      amount: 16.53,
+      amount: 6.53,
       date: DateTime.now().subtract(Duration(days: 4)),
     ),
     Transaction(
-      id: 't2',
+      id: 't7',
       title: 'Utensils',
-      amount: 16.53,
+      amount: 12.53,
       date: DateTime.now().subtract(Duration(days: 5)),
     ),
     Transaction(
-      id: 't2',
+      id: 't8',
       title: 'Stationery',
-      amount: 16.53,
+      amount: 32.53,
       date: DateTime.now().subtract(Duration(days: 6)),
     ),
   ];
 
   bool _showChart = false;
+
+  @override
+  void initState() {
+    WidgetsBinding.instance.addObserver(this);
+    super.initState();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    print(state);
+  }
+
+  @override
+  dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
 
   List<Transaction> get _recentTransactions {
     return _userTransactions.where((tx) {
@@ -135,8 +152,11 @@ class _MyHomePageState extends State<MyHomePage> {
     });
   }
 
-  void _deleteTransaction(String id) => setState(
-      () => _userTransactions.removeWhere((element) => element.id == id));
+  void _deleteTransaction(String id) {
+    setState(() {
+      _userTransactions.removeWhere((element) => element.id == id);
+    });
+  }
 
   void startAddNewTransation(BuildContext ctx) {
     showModalBottomSheet(
@@ -151,8 +171,40 @@ class _MyHomePageState extends State<MyHomePage> {
     );
   }
 
+  List<Widget> _buildLandsacapeContent(
+      bool isLandscape, BuildContext context, AppBar appBar) {
+    return [
+      Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Text('Show Chart'),
+          Switch.adaptive(
+            value: _showChart,
+            onChanged: (val) {
+              setState(() => _showChart = val);
+            },
+          )
+        ],
+      ),
+      _showChart
+          ? chartWidget(context, appBar, 0.8)
+          :
+          // NewTransaction(_addNewTransaction),
+          txListWidget(context, appBar),
+    ];
+  }
+
+  List<Widget> _buildPortraitContent(
+      bool isLandscape, BuildContext context, AppBar appBar) {
+    return [
+      chartWidget(context, appBar, 0.3),
+      txListWidget(context, appBar),
+    ];
+  }
+
   @override
   Widget build(BuildContext context) {
+    print('build() MyHomePageState');
     final mediaQuery = MediaQuery.of(context);
     final isLandscape = mediaQuery.orientation == Orientation.landscape;
     final appBar = Platform.isIOS
@@ -217,28 +269,12 @@ class _MyHomePageState extends State<MyHomePage> {
         // mainAxisAlignment: MainAxisAlignment.spaceEvenly,
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          if (isLandscape)
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Text('Show Chart'),
-                Switch.adaptive(
-                  value: _showChart,
-                  onChanged: (val) {
-                    setState(() => _showChart = val);
-                  },
-                )
-              ],
-            ),
-          if (!isLandscape) chartWidget(context, appBar, 0.3),
-          if (!isLandscape) txListWidget(context, appBar),
-          if (isLandscape)
-            _showChart
-                ? chartWidget(context, appBar, 0.8)
-                :
-                // NewTransaction(_addNewTransaction),
-                txListWidget(context, appBar),
-        ], // Top Column children
+          if (!isLandscape)
+            ..._buildPortraitContent(isLandscape, context, appBar)
+          else if (isLandscape)
+            ..._buildLandsacapeContent(isLandscape, context, appBar)
+          // Top Column children
+        ],
       ),
     );
   }
